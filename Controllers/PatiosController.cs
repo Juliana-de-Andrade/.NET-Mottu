@@ -7,32 +7,38 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using challenger.Domain.Entities;
 using challenger.Infrastructure.Context;
+using challenger.Infrastructure.Persistence.Repositories;
+using challenger.Infrastructure.DTO.Request;
 
 namespace challenger.Controllers
 {
+
+
     [Route("api/[controller]")]
     [ApiController]
     public class PatiosController : ControllerBase
     {
-        private readonly CGContext _context;
-
-        public PatiosController(CGContext context)
+        private readonly IRepository<Patio> _patioRepository;
+        private readonly IPatioRepository _ratioRepository;
+            
+        public PatiosController(IRepository<Patio> patioRepository, IPatioRepository ratioRepository)
         {
-            _context = context;
+            _patioRepository = patioRepository;
+            _ratioRepository = ratioRepository;
         }
 
         // GET: api/Patios
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Patio>>> GetPatios()
+        public async Task<IEnumerable<Patio>> GetPatios()
         {
-            return await _context.Patios.ToListAsync();
+            return await _patioRepository.GetAllAsync();
         }
 
         // GET: api/Patios/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Patio>> GetPatio(Guid id)
         {
-            var patio = await _context.Patios.FindAsync(id);
+            var patio = await _patioRepository.GetByIdAssync(id);
 
             if (patio == null)
             {
@@ -40,6 +46,20 @@ namespace challenger.Controllers
             }
 
             return patio;
+        }
+
+        // GET: api/Patios/cidade/SaoPaulo
+        [HttpGet("cidade/{cidade}")]
+        public async Task<ActionResult<IEnumerable<Patio>>> GetPatiosPorCidade(string cidade)
+        {
+            var patios = await _ratioRepository.GetByCidadeAsync(cidade);
+
+            if (!patios.Any())
+            {
+                return NotFound($"Nenhum pátio encontrado para a cidade '{cidade}'.");
+            }
+
+            return Ok(patios);
         }
 
         // PUT: api/Patios/5
@@ -52,34 +72,20 @@ namespace challenger.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(patio).State = EntityState.Modified;
+            _patioRepository.Update(patio);
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PatioExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
+            
             return NoContent();
         }
 
         // POST: api/Patios
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Patio>> PostPatio(Patio patio)
+        public async Task<ActionResult<Patio>> PostPatio(PatioRequest patioRequest)
         {
-            _context.Patios.Add(patio);
-            await _context.SaveChangesAsync();
+            var patio = new Patio(patioRequest);
+
+            await _patioRepository.AddAsync(patio);
 
             return CreatedAtAction("GetPatio", new { id = patio.Id }, patio);
         }
@@ -88,21 +94,16 @@ namespace challenger.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePatio(Guid id)
         {
-            var patio = await _context.Patios.FindAsync(id);
+            var patio = await _patioRepository.GetByIdAssync(id);
             if (patio == null)
             {
                 return NotFound();
             }
 
-            _context.Patios.Remove(patio);
-            await _context.SaveChangesAsync();
+            _patioRepository.Delete(patio);
 
             return NoContent();
-        }
-
-        private bool PatioExists(Guid id)
-        {
-            return _context.Patios.Any(e => e.Id == id);
-        }
+        }                    
+            
     }
 }
