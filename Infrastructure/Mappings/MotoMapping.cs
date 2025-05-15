@@ -8,6 +8,8 @@ namespace challenger.Infrastructure.Mappings
     {
         public void Configure(EntityTypeBuilder<Moto> builder)
         {
+            builder.ToTable("Moto");
+
             builder
                 .HasKey("Id");
 

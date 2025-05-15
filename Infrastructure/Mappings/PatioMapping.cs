@@ -9,6 +9,7 @@ namespace challenger.Infrastructure.Mappings
     {
         public void Configure(EntityTypeBuilder<Patio> builder)
         {
+            builder.ToTable("Patio");
             builder
                 .HasKey("Id");
 
