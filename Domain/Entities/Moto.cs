@@ -24,8 +24,6 @@ namespace challenger.Domain.Entities
         {
             Placa = placa;
             Modelo = modelo;
-            
-
         }
 
         public void Inativa()
