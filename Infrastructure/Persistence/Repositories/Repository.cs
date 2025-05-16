@@ -26,7 +26,7 @@ namespace challenger.Infrastructure.Persistence.Repositories
         public void Delete(T entity)
         {
             _dbSet.Remove(entity);
-            _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
 
         public async Task<IEnumerable<T>> GetAllAsync()
@@ -41,8 +41,8 @@ namespace challenger.Infrastructure.Persistence.Repositories
 
         public void Update(T entity)
         {
-            _dbSet.Update(entity);
-            _context.SaveChangesAsync();
+            _dbSet.Entry(entity).State = EntityState.Modified;
+            _context.SaveChanges();
         }
     }
 
