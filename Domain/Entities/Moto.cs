@@ -1,4 +1,5 @@
-﻿using challenger.Domain.Enum;
+﻿using System.Numerics;
+using challenger.Domain.Enum;
 using challenger.Infrastructure.DTO.Request;
 
 namespace challenger.Domain.Entities
@@ -17,15 +18,26 @@ namespace challenger.Domain.Entities
         public Moto(MotoRequest motoRequest)
         {
             Id = Guid.NewGuid();
+            Placa = motoRequest.Placa;
+            Modelo = motoRequest.Modelo;
+            PatioId = motoRequest.PatioId;
             Status = StatusMoto.INATIVA;
         }
 
-        public Moto(string placa, string modelo)
+        public Moto()
         {
-            Placa = placa;
-            Modelo = modelo;
+            
         }
 
+        public void Update(MotoRequest motoRequest)
+        {
+            Placa = motoRequest.Placa;
+            Modelo = motoRequest.Modelo;
+            PatioId = motoRequest.PatioId;
+
+            Updated = "sistema"; // ou usuário autenticado
+            DataUpadated = DateTime.UtcNow;
+        }
         public void Inativa()
         {
             if (Status == StatusMoto.INATIVA)

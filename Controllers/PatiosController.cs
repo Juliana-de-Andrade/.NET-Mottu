@@ -9,6 +9,7 @@ using challenger.Domain.Entities;
 using challenger.Infrastructure.Context;
 using challenger.Infrastructure.Persistence.Repositories;
 using challenger.Infrastructure.DTO.Request;
+using System.Net;
 
 namespace challenger.Controllers
 {
@@ -65,14 +66,23 @@ namespace challenger.Controllers
         // PUT: api/Patios/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPatio(Guid id, Patio patio)
+        public async Task<IActionResult> PutPatio(Guid id, PatioRequest patioRequest)
         {
-            if (id != patio.Id)
+            var patioExistente = await _patioRepository.GetByIdAssync(id);
+
+            if (patioExistente == null)
+                return NotFound("Pátio não encontrado.");
+
+
+
+            if (id != patioRequest.Id)
             {
                 return BadRequest();
             }
 
-            _patioRepository.Update(patio);
+            patioExistente.Update(patioRequest);
+
+            _patioRepository.Update(patioExistente);
 
             
             return NoContent();
@@ -81,6 +91,9 @@ namespace challenger.Controllers
         // POST: api/Patios
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [ProducesResponseType((int)HttpStatusCode.Created)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<ActionResult<Patio>> PostPatio(PatioRequest patioRequest)
         {
             var patio = new Patio(patioRequest);

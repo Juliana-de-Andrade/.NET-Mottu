@@ -9,6 +9,7 @@ using challenger.Domain.Entities;
 using challenger.Infrastructure.Context;
 using challenger.Infrastructure.Persistence.Repositories;
 using challenger.Infrastructure.DTO.Request;
+using System.Net;
 
 namespace challenger.Controllers
 {
@@ -18,13 +19,16 @@ namespace challenger.Controllers
     {
         private readonly IRepository<Moto> _motoesRepository;
 
-        public MotoesController(IRepository<Moto> motoesRepository, IMotoRepository iMotoesRepository)
+        public MotoesController(IRepository<Moto> motoesRepository, IMotoRepository iMotoesRepository, IRepository<Patio> patioRepository)
         {
             _motoesRepository = motoesRepository;
             _iMotoesRepository = iMotoesRepository;
+            _patioRepository = patioRepository;
         }
 
         private readonly IMotoRepository _iMotoesRepository;
+        private readonly IRepository<Patio> _patioRepository;
+
 
         // GET: api/Motoes
         [HttpGet]
@@ -65,14 +69,22 @@ namespace challenger.Controllers
         // PUT: api/Motoes/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutMoto(Guid id, Moto moto)
+        public async Task<IActionResult> PutMoto(Guid id, MotoRequest motoRequest)
         {
-            if (id != moto.Id)
+
+            var motoExistente = await _motoesRepository.GetByIdAssync(id);
+
+            if (motoExistente == null)
+                return NotFound("Moto não encontrada.");
+
+            if (id != motoExistente.Id)
             {
                 return BadRequest();
             }
 
-            _motoesRepository.Update(moto);
+            motoExistente.Update(motoRequest);
+
+            _motoesRepository.Update(motoExistente);
             
 
             return NoContent();
@@ -81,10 +93,24 @@ namespace challenger.Controllers
         // POST: api/Motoes
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-
+        [ProducesResponseType((int)HttpStatusCode.Created)]
+        [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<ActionResult<Moto>> PostMoto(MotoRequest motoRequest)
         {
-            var moto = new Moto(motoRequest);
+            var patio = await _patioRepository.GetByIdAssync(motoRequest.PatioId);
+            if (patio == null)
+                return BadRequest("Pátio não encontrado");
+
+
+            var moto = new Moto(motoRequest)
+            {
+                Created = "sistema", // ou o nome do usuário autenticado
+                DataCreated = DateTime.UtcNow,
+                Updated = "sistema",
+                DataUpadated = DateTime.UtcNow
+
+            };
 
             await _motoesRepository.AddAsync(moto);
 

@@ -13,5 +13,8 @@ namespace challenger.Infrastructure.DTO.Request
 
         [Required(ErrorMessage = "O modelo é obrigatório")]
         public string Modelo { get; set; }
+
+        [Required(ErrorMessage = "O id do patio é obrigatório")]
+        public Guid PatioId { get; set; }
     }
 }

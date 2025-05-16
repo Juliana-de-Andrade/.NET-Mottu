@@ -25,6 +25,22 @@ namespace challenger.Domain.Entities
             Name = patioRequest.Name;
             Cidade = patioRequest.Cidade;
             Capacidade = patioRequest.Capacidade;
+
+            Created = "Sistema"; // Ou algum usuário real
+            DataCreated = DateTime.UtcNow;
+            Updated = "Sistema";
+            DataUpadated = DateTime.UtcNow;
         }
+
+        public void Update(PatioRequest request)
+        {
+            Name = request.Name;
+            Cidade = request.Cidade;
+            Capacidade = request.Capacidade;
+
+            Updated = "sistema"; // ou obtenha do usuário autenticado
+            DataUpadated = DateTime.UtcNow;
+        }
+
     }
 }
