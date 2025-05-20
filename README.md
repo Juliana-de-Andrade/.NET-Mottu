@@ -92,7 +92,7 @@ Oferecer uma solução backend robusta para:
   dotnet run
   ```
 5. Acesse a documentação da API:
-  - Swagger UI: http://localhost:5000/swagger
+  - Swagger UI: http://localhost:5079/swagger
 
 ---
 
